@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instagram Authorization Callback</title>
+<style>
+  body { max-width: 46rem; margin: 3rem auto; padding: 0 1.25rem;
+         font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #14181f; }
+  h1 { font-size: 1.35rem; }
+  .box { background: #f2f4f7; border-radius: 10px; padding: 1rem; margin: 1rem 0; }
+  textarea { width: 100%; min-height: 9rem; font: 13px/1.5 ui-monospace, Menlo, monospace;
+             padding: .6rem; border: 1px solid #cbd2dc; border-radius: 8px; box-sizing: border-box; }
+  button { font: inherit; padding: .55rem 1rem; border: 0; border-radius: 8px;
+           background: #111827; color: #fff; cursor: pointer; }
+  .warn { background: #fff4e5; border-left: 4px solid #f59e0b; padding: .75rem 1rem; border-radius: 6px; }
+  .ok { color: #0b7a3b; font-weight: 600; }
+  .err { color: #b42318; font-weight: 600; }
+  code { background: #eef1f6; padding: .1rem .35rem; border-radius: 4px; }
+</style>
+</head>
+<body>
+<h1>Instagram Authorization Callback</h1>
+<p>Halaman ini menampilkan kode otorisasi dari Instagram supaya bisa kamu salin
+ke server. Halaman ini statis — tidak menyimpan apa pun, tidak mengirim apa pun ke mana pun.</p>
+
+<div id="hasil" class="box">Membaca parameter dari URL…</div>
+
+<div class="warn">
+  Setelah tersalin, <strong>jangan kirim kode ini ke chat</strong>.
+  Tempelkan lewat skrip di server: <code>bash /root/infotech-jakarta/ig_exchange_code.sh</code>
+</div>
+
+<script>
+(function () {
+  const p = new URLSearchParams(window.location.search);
+  const out = document.getElementById('hasil');
+  const code = p.get('code');
+  const err = p.get('error') || p.get('error_description') || p.get('error_message');
+
+  if (code) {
+    out.innerHTML = '<p class="ok">Kode otorisasi ditemukan.</p>' +
+      '<p>Salin kode di bawah ini (tombol Salin), lalu tempel ke skrip di server.</p>' +
+      '<textarea id="kode" readonly></textarea>' +
+      '<p><button id="salin">Salin kode</button> <span id="pesan"></span></p>' +
+      '<p style="font-size:.85rem;color:#63707f">Kode ini hanya berlaku sekali dan umurnya pendek — pakai segera.</p>';
+    document.getElementById('kode').value = code;
+    document.getElementById('salin').addEventListener('click', async function () {
+      const t = document.getElementById('kode');
+      t.select();
+      try { await navigator.clipboard.writeText(code); }
+      catch (e) { document.execCommand('copy'); }
+      document.getElementById('pesan').textContent = 'Tersalin ✓';
+    });
+  } else if (err) {
+    out.innerHTML = '<p class="err">Instagram menolak permintaan ini.</p><p>' +
+      String(err).replace(/[<>&]/g, '') + '</p>';
+  } else {
+    out.innerHTML = '<p class="err">Tidak ada kode di URL.</p>' +
+      '<p>Pastikan alamatnya berakhiran <code>callback.html?code=...</code>.</p>';
+  }
+})();
+</script>
+</body>
+</html>
